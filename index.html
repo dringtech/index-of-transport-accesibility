@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>iota :: Index of Transport Accessibility</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin="" />
+  <!-- Make sure you put this AFTER Leaflet's CSS -->
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+    integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+    crossorigin=""></script>
+  <style>
+    * {
+      margin: 0;
+    }
+
+    html,
+    body,
+    main {
+      height: 100%;
+    }
+
+    #map {
+      height: 100%;
+    }
+  </style>
+</head>
+
+<body>
+  <main role="main">
+    <div id="map"></div>
+  </main>
+  <script>
+    async function init() {
+      const resp = await fetch('./iota.geojson');
+
+      var geoJsonLayer = L.geoJSON(await resp.json(), {
+        style: (feature) => {
+          return {
+            color: feature.properties.c,
+            weight: 1,
+            fillColor: feature.properties.c,
+          };
+        }
+      })
+
+      var map = L.map('map').fitBounds(geoJsonLayer.getBounds());
+
+      // https://leaflet-extras.github.io/leaflet-providers/preview/
+      var baseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 20
+      });
+      baseLayer.addTo(map);
+      // const data = await resp.json();
+      geoJsonLayer.addTo(map);
+      
+      await map.flyToBounds(geoJsonLayer.getBounds());
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+
+</html>
