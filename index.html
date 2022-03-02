@@ -47,6 +47,8 @@
             fillColor: feature.properties.c,
           };
         }
+      }).bindPopup((layer) => {
+        return `${layer.feature.properties.msoa11nm} = ${layer.feature.properties.iota}`
       })
 
       var map = L.map('map').fitBounds(geoJsonLayer.getBounds());
