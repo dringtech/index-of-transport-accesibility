@@ -52,8 +52,12 @@
       const colourScale = (v) => '#' + evaluate_cmap(v / max, scaleName, false).map(x => x.toString(16).padStart(2, '0')).join('');
 
       function getValue(code) {
-        const [msoa11cd, value] = data.find(r => r[0] === code);
-        return value;
+        try {
+          const [msoa11cd, value] = data.find(r => r[0] === code);
+          return value;
+        } catch {
+          return 0;
+        }
       }
 
       function makeStyle(feature) {
