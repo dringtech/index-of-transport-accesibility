@@ -30,12 +30,32 @@
     #map {
       height: 100%;
     }
+
+    #data-selector {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      background-color: #33333350;
+    }
+    #data-selector * {
+      margin: 0.5em;
+    }
   </style>
 </head>
 
 <body>
   <main role="main">
     <div id="map"></div>
+    <nav id="data-selector">
+      <button id="choose-car">Car</button>
+      <button id="choose-bike">Bike</button>
+      <button id="choose-walk">Walk</button>
+      <button id="choose-transit">Transit</button>
+    </nav>
   </main>
   <script>
     async function init() {
@@ -61,6 +81,11 @@
       }
 
       await loadData('./accessibility_index.csv');
+
+      document.getElementById('choose-car').addEventListener('click', () => loadData('./accessibility_index_car.csv'))
+      document.getElementById('choose-bike').addEventListener('click', () => loadData('./accessibility_index_bicycle.csv'))
+      document.getElementById('choose-transit').addEventListener('click', () => loadData('./accessibility_index_transit.csv'))
+      document.getElementById('choose-walk').addEventListener('click', () => loadData('./accessibility_index_walk.csv'))
 
       function getValue(code) {
         try {
