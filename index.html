@@ -14,6 +14,8 @@
   <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
     integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
     crossorigin=""></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/timothygebhard/js-colormaps@master/js-colormaps.js"></script>
   <style>
     * {
       margin: 0;
@@ -37,18 +39,33 @@
   </main>
   <script>
     async function init() {
-      const resp = await fetch('./iota.geojson');
+      const data = await fetch('./accessibility_index.csv')
+        .then(d => d.text())
+        .then(d => d.split('\n').map(r => r.split(',')))
+        .then(d => d.slice(1).map(([m, v]) => ([m, parseInt(v)])).filter(([_, v]) => !isNaN(v)));
+
+        const resp = await fetch('./iota.geojson');
+
+      let max = Math.max(...data.map(x => x[1]));
+
+      const scaleName = 'hot';
+      const colourScale = (v) => '#' + evaluate_cmap(v / max, scaleName, false).map(x => x.toString(16).padStart(2, '0')).join('');
+
+      function getValue(code) {
+        const [msoa11cd, value] = data.find(r => r[0] === code);
+        return value;
+      }
+
+      function makeStyle(feature) {
+        const value = getValue(feature.properties.msoa11cd);
+        const color = colourScale(value);
+        return { weight: 1, color: color, opacity: 0.5, fillColor: color, fillOpacity: 0.2 };
+      }
 
       var geoJsonLayer = L.geoJSON(await resp.json(), {
-        style: (feature) => {
-          return {
-            color: feature.properties.c,
-            weight: 1,
-            fillColor: feature.properties.c,
-          };
-        }
+        style: makeStyle,
       }).bindPopup((layer) => {
-        return `${layer.feature.properties.msoa11nm} = ${layer.feature.properties.iota}`
+        return `${layer.feature.properties.msoa11nm} = ${getValue(layer.feature.properties.msoa11cd)}`
       })
 
       var map = L.map('map').fitBounds(geoJsonLayer.getBounds());
